@@ -29,4 +29,14 @@ class TaskController extends Controller
             });
         return Inertia::render('Tasks/Index', ['tasks' => $tasks]);
     }
+    public function store(Request $request)
+    {
+        $request->validate(['description' => 'required']);
+
+        $request->user()->tasks()->create([
+            'description' => $request->description,
+        ]);
+
+        return redirect()->back();
+    }
 }

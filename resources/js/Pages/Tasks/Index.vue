@@ -4,6 +4,7 @@ import {Head, useForm} from '@inertiajs/vue3';
 import TaskList from "@/Pages/Tasks/TaskList.vue";
 import {PropType, ref} from "vue";
 import {Task} from "@/types";
+import AddTaskForm from "@/Pages/Tasks/Partials/AddTaskForm.vue";
 
 const props = defineProps({
     tasks: { type: Array as PropType<Task>, required: true, },
@@ -21,6 +22,7 @@ const props = defineProps({
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
+                <AddTaskForm />
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <TaskList :tasks="tasks" />
                 </div>
