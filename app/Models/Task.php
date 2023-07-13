@@ -30,4 +30,9 @@ class Task extends Model
     {
         return $this->status === 'in progress';
     }
+
+    public function isSubtask(): bool
+    {
+        return $this->parent_task_id !== null;
+    }
 }
