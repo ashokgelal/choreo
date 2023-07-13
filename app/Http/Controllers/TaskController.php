@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\TaskResource;
 use App\Models\Task;
+use App\Models\TaskStatus;
 use App\Notifications\TaskInProgressReminder;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rules\Enum;
 use Inertia\Inertia;
 
 class TaskController extends Controller
@@ -46,7 +48,7 @@ class TaskController extends Controller
     {
         $this->authorize('update', $task);
 
-        $request->validate(['description' => 'required']);
+        $request->validate(['description' => 'sometimes|required', 'status' => [new Enum(TaskStatus::class)]]);
 
         $task->update($request->all());
 

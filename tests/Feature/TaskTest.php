@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Task;
+use App\Models\TaskStatus;
 use App\Models\User;
 use App\Notifications\TaskInProgressReminder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -145,5 +146,22 @@ class TaskTest extends TestCase
             ]);
 
         Notification::assertNothingSent();
+    }
+
+    /** @test */
+    public function updating_task_status_validates_enum_values()
+    {
+        $user = User::factory()->create();
+        $task = Task::factory()->create(['user_id' => $user->id]);
+
+        $this->actingAs($user)
+            ->put('/tasks/'.$task->id, [
+                'status' => 'invalid_status'
+            ])->assertSessionHasErrors('status');
+
+        $this->actingAs($user)
+            ->put('/tasks/'.$task->id, [
+                'status' => TaskStatus::DONE->value
+            ])->assertSessionDoesntHaveErrors('status');
     }
 }
