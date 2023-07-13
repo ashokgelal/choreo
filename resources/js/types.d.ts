@@ -4,6 +4,7 @@ declare global {
         description: string,
         subtasks: Task[],
         status: string,
+        parent_task_id: number,
     }
 }
 export {}

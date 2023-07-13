@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\TaskResource;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -12,22 +13,11 @@ class TaskController extends Controller
     {
         $tasks = Task::with('user', 'subtasks')
             ->where('user_id', auth()->id())
+            ->parentOnly()
             ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($task) {
-                return [
-                    'id' => $task->id,
-                    'description' => $task->description,
-                    'status' => $task->status,
-                    'progress_started_at' => $task->progress_started_at,
-                    'created_at' => $task->created_at,
-                    'user' => [
-                        'id' => $task->user->id,
-                        'name' => $task->user->name,
-                    ],
-                ];
-            });
-        return Inertia::render('Tasks/Index', ['tasks' => $tasks]);
+            ->get();
+
+        return Inertia::render('Tasks/Index', ['tasks' => TaskResource::collection($tasks)]);
     }
 
     public function store(Request $request)
@@ -36,6 +26,7 @@ class TaskController extends Controller
 
         $request->user()->tasks()->create([
             'description' => $request->description,
+            'parent_task_id' => $request->parent_task_id,
         ]);
 
         return redirect()->back();
