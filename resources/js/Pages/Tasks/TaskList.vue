@@ -4,7 +4,7 @@ import {PropType} from "vue";
 import TaskItem from "@/Pages/Tasks/TaskItem.vue";
 
 const props = defineProps({
-    tasks: { type: Array as PropType<Task>, required: true, },
+    tasks: { type: Array as PropType<Task[]>, required: true, },
 })
 </script>
 

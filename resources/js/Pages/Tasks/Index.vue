@@ -3,11 +3,10 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import {Head, useForm} from '@inertiajs/vue3';
 import TaskList from "@/Pages/Tasks/TaskList.vue";
 import {PropType, ref} from "vue";
-import {Task} from "@/types";
 import AddTaskForm from "@/Pages/Tasks/Partials/AddTaskForm.vue";
 
 const props = defineProps({
-    tasks: { type: Array as PropType<Task>, required: true, },
+    tasks: { type: Array as PropType<Task[]>, required: true, },
 })
 
 </script>

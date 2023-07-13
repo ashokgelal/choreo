@@ -67,7 +67,7 @@ function updateTask() {
                     <PrimaryButton class="mt-4">Update</PrimaryButton>
                     <button class="mt-4" @click="cancelEditing()">Cancel</button>
                 </div>
-                <InputError :message="editForm.errors.description" class="mt-2"/>
+                <InputError v-if="editForm.errors.description" :message="editForm.errors.description" class="mt-2"/>
             </form>
             <div  v-else class="mr-4 flex">
                 <div class="font-medium flex-1" :class="{'line-through text-gray-400': taskIsDone, 'text-gray-900': !taskIsDone}">{{ task.description }}</div>

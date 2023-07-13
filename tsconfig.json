@@ -14,9 +14,9 @@
         "skipLibCheck": true,
         "baseUrl": ".",
         "paths": {
-            "@/*": [ "./resources/js/*" ],
+            "@/*": [ "./resources/js/*" ]
         },
-        "types": [ "unplugin-vue-define-options/macros-global" ],
+        "types": [ "unplugin-vue-define-options/macros-global" ]
     },
     "references": [
         {

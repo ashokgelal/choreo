@@ -55,7 +55,7 @@ function createTask() {
                     @keyup.enter="createTask"
                 />
 
-                <InputError :message="form.errors.description" class="mt-2"/>
+                <InputError v-if="form.errors.description" :message="form.errors.description" class="mt-2"/>
             </div>
 
             <div class="mt-6 flex justify-end">
