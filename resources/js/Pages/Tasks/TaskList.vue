@@ -10,8 +10,8 @@ const props = defineProps({
 
 <template>
     <fieldset class="p-4">
-        <legend class="text-base font-semibold leading-6 text-gray-900">Tasks</legend>
-        <div class="mt-4 divide-y divide-gray-200 border-b border-t border-gray-200">
+        <legend class="text-xl font-bold leading-6 text-gray-900 pt-4 uppercase">Tasks</legend>
+        <div class="divide-y divide-gray-200 border-b border-t border-gray-200">
             <div v-for="task in tasks" :key="task.id" >
                 <TaskItem :task="task"/>
             </div>

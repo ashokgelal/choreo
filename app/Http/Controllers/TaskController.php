@@ -29,6 +29,7 @@ class TaskController extends Controller
             });
         return Inertia::render('Tasks/Index', ['tasks' => $tasks]);
     }
+
     public function store(Request $request)
     {
         $request->validate(['description' => 'required']);
@@ -36,6 +37,17 @@ class TaskController extends Controller
         $request->user()->tasks()->create([
             'description' => $request->description,
         ]);
+
+        return redirect()->back();
+    }
+
+    public function update(Request $request, Task $task)
+    {
+        $this->authorize('update', $task);
+
+        $request->validate(['description' => 'required']);
+
+        $task->update($request->all());
 
         return redirect()->back();
     }
