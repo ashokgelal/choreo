@@ -14,5 +14,7 @@ Route::get('/', function () {
     ]);
 });
 
-Route::resource('tasks', TaskController::class)->middleware(['auth']);
+Route::resource('tasks', TaskController::class)
+    ->only(['index', 'store', 'update', 'destroy'])
+    ->middleware(['auth']);
 require __DIR__.'/auth.php';

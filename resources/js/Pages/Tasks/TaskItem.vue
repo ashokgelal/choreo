@@ -5,6 +5,7 @@ import {useForm} from "@inertiajs/vue3";
 import InputError from "@/Components/InputError.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
+import DropdownLink from "@/Components/DropdownLink.vue";
 
 const props = defineProps({
     task: Object as PropType<Task>,
@@ -65,10 +66,13 @@ function enterEditingMode() {
             </template>
             <template #content>
                 <button
-                    class="block w-full px-4 py-2 text-left leading-5 text-gray-700 hover:bg-gray-100 focus:bg-gray-100 transition duration-150 ease-in-out"
+                    class="block w-full px-4 py-2 text-left leading-5 text-gray-700 hover:bg-gray-100 focus:bg-gray-100 transition duration-150 ease-in-out text-sm"
                     @click="enterEditingMode">
                     Edit
                 </button>
+                <DropdownLink as="button" :href="route('tasks.destroy', task.id)" method="delete" class="text-red-500">
+                    Delete
+                </DropdownLink>
             </template>
         </Dropdown>
     </div>

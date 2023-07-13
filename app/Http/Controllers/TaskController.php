@@ -51,4 +51,13 @@ class TaskController extends Controller
 
         return redirect()->back();
     }
+
+    public function destroy(Task $task)
+    {
+        $this->authorize('delete', $task);
+
+        $task->delete();
+
+        return redirect()->back();
+    }
 }
