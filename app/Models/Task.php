@@ -9,7 +9,7 @@ class Task extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['description', 'status'];
+    protected $fillable = ['description', 'status', 'parent_task_id'];
 
     public function user()
     {
@@ -19,5 +19,10 @@ class Task extends Model
     public function subtasks()
     {
         return $this->hasMany(Task::class, 'parent_task_id');
+    }
+
+    public function scopeParentOnly($query)
+    {
+        return $query->whereNull('parent_task_id');
     }
 }

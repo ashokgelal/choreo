@@ -1,18 +1,21 @@
 <script setup lang="ts">
-import {computed, nextTick, PropType, ref, watch} from "vue";
+import {computed, nextTick, PropType, ref} from "vue";
 import Dropdown from "@/Components/Dropdown.vue";
 import {useForm} from "@inertiajs/vue3";
 import InputError from "@/Components/InputError.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
 import DropdownLink from "@/Components/DropdownLink.vue";
+import AddTaskForm from "@/Pages/Tasks/Partials/AddTaskForm.vue";
 
 const props = defineProps({
     task: Object as PropType<Task>,
 })
 
-const availableTaskStatusActions = computed(() =>  ['todo', 'in progress', 'done'].filter(status => status !== props.task.status));
+const availableTaskStatusActions = computed(() => ['todo', 'in progress', 'done'].filter(status => status !== props.task.status));
 const taskIsDone = computed(() => props.task.status === 'done');
+const taskIsParent = computed(() => props.task.parent_task_id == null);
+const taskHasSubtasks = computed(() => props.task.subtasks?.length > 0);
 
 function changeStatus(status: string) {
     editForm.transform((data) => {
@@ -23,7 +26,6 @@ function changeStatus(status: string) {
     })
     editForm.put(route('tasks.update', props.task.id))
 }
-
 
 const editInput = ref<HTMLInputElement | null>(null);
 const editing = ref(false);
@@ -62,16 +64,22 @@ function updateTask() {
                     <TextInput v-model="editForm.description"
                                ref="editInput"
                                type="text"
-                              class="mt-4 w-full text-gray-900 border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm"/>
+                               class="mt-4 w-full text-gray-900 border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm"/>
 
                     <PrimaryButton class="mt-4">Update</PrimaryButton>
                     <button class="mt-4" @click="cancelEditing()">Cancel</button>
                 </div>
                 <InputError v-if="editForm.errors.description" :message="editForm.errors.description" class="mt-2"/>
             </form>
-            <div  v-else class="mr-4 flex">
-                <div class="font-medium flex-1" :class="{'line-through text-gray-400': taskIsDone, 'text-gray-900': !taskIsDone}">{{ task.description }}</div>
-                <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 uppercase">{{ task.status }}</span>
+            <div v-else class="mr-4 flex">
+                <div class="font-medium flex-1"
+                     :class="{'line-through text-gray-400': taskIsDone, 'text-gray-900': !taskIsDone}">
+                    {{ task.description }}
+                </div>
+                <span v-if="!taskHasSubtasks || !taskIsParent"
+                      class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 uppercase">{{
+                        task.status
+                    }}</span>
             </div>
         </div>
         <Dropdown>
@@ -85,14 +93,26 @@ function updateTask() {
                 </button>
             </template>
             <template #content>
-                <button
-                    v-for="action in availableTaskStatusActions"
-                    :key="action"
-                    class="block w-full px-4 py-2 text-left leading-5 text-gray-700 hover:bg-gray-100 focus:bg-gray-100 transition duration-150 ease-in-out text-sm"
-                    @click="changeStatus(action)">
-                    Mark <span class="uppercase"> {{ action }} </span>
-                </button>
-                <div class="border-t border-gray-100"></div>
+                <template v-if="!taskHasSubtasks || !taskIsParent">
+                    <button
+                        v-for="action in availableTaskStatusActions"
+                        :key="action"
+                        class="block w-full px-4 py-2 text-left leading-5 text-gray-700 hover:bg-gray-100 focus:bg-gray-100 transition duration-150 ease-in-out text-sm"
+                        @click="changeStatus(action)">
+                        Mark <span class="uppercase"> {{ action }} </span>
+                    </button>
+                    <div class="border-t border-gray-100"/>
+                </template>
+                <AddTaskForm v-if="taskIsParent" :parent="task">
+                    <template #default="{triggerShow}">
+                        <button
+                            class="block w-full px-4 py-2 text-left leading-5 text-gray-700 hover:bg-gray-100 focus:bg-gray-100 transition duration-150 ease-in-out text-sm"
+                            @click="triggerShow">
+                            Add Subtask
+                        </button>
+                    </template>
+                </AddTaskForm>
+                <div class="border-t border-gray-100"/>
                 <button
                     class="block w-full px-4 py-2 text-left leading-5 text-gray-700 hover:bg-gray-100 focus:bg-gray-100 transition duration-150 ease-in-out text-sm"
                     @click="enterEditingMode">
