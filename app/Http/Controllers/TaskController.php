@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\TaskResource;
 use App\Models\Task;
+use App\Models\TaskStatus;
 use App\Notifications\TaskInProgressReminder;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rules\Enum;
 use Inertia\Inertia;
 
 class TaskController extends Controller
@@ -23,7 +25,16 @@ class TaskController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate(['description' => 'required']);
+        $validated = $request->validate(['description' => 'required', 'parent_task_id' => 'nullable|exists:tasks,id']);
+        $parentTaskId = $validated['parent_task_id'];
+
+        if($parentTaskId !== null)
+        {
+            if(Task::find($parentTaskId)->isSubtask())
+            {
+                return response()->json(['message' => 'Subtask cannot be added for subtasks'], 422);
+            }
+        }
 
         $request->user()->tasks()->create([
             'description' => $request->description,
@@ -37,7 +48,7 @@ class TaskController extends Controller
     {
         $this->authorize('update', $task);
 
-        $request->validate(['description' => 'required']);
+        $request->validate(['description' => 'sometimes|required', 'status' => [new Enum(TaskStatus::class)]]);
 
         $task->update($request->all());
 
