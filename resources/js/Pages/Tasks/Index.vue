@@ -6,7 +6,7 @@ import {PropType, ref} from "vue";
 import AddTaskForm from "@/Pages/Tasks/Partials/AddTaskForm.vue";
 
 const props = defineProps({
-    tasks: { type: Array as PropType<Task[]>, required: true, },
+    tasks: { type: Object as PropType<{data: Task[]}>, required: true, },
 })
 
 </script>
@@ -23,7 +23,7 @@ const props = defineProps({
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
                 <AddTaskForm />
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <TaskList :tasks="tasks" />
+                    <TaskList :tasks="tasks.data" />
                 </div>
             </div>
         </div>
