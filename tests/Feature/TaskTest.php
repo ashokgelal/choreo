@@ -4,9 +4,12 @@ namespace Tests\Feature;
 
 use App\Models\Task;
 use App\Models\User;
+use App\Notifications\TaskInProgressReminder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 use Inertia\Testing\AssertableInertia as Assert;
+use Illuminate\Support\Facades\Notification;
 
 class TaskTest extends TestCase
 {
@@ -77,5 +80,70 @@ class TaskTest extends TestCase
 
         $response->assertStatus(403);
         $this->assertDatabaseHas('tasks', ['id' => $task->id]);
+    }
+
+    /** @test */
+    public function updating_task_status_to_in_progress_dispatches_task_in_progress_reminder_notification()
+    {
+        Notification::fake();
+
+        $user = User::factory()->create();
+        $task = Task::factory()->create(['user_id' => $user->id, 'status' => 'todo', 'progress_started_at' => null]);
+
+        $this->actingAs($user)
+            ->put('/tasks/'.$task->id, [
+                'description' => $task->description,
+                'status' => 'in progress',
+            ]);
+
+        Notification::assertSentTo($user, TaskInProgressReminder::class, function ($notification, $channels) use ($task) {
+            return $notification->task->id === $task->id;
+        });
+    }
+
+    /** @test */
+    public function updating_task_status_to_in_progress_multiple_times_does_not_dispatch_task_in_progress_reminder_notification()
+    {
+        Notification::fake();
+
+        $user = User::factory()->create();
+        $task = Task::factory()->create(['user_id' => $user->id, 'status' => 'todo', 'progress_started_at' => null]);
+
+        $this->actingAs($user)
+            ->put('/tasks/'.$task->id, [
+                'description' => $task->description,
+                'status' => 'in progress',
+            ]);
+
+        $this->actingAs($user)
+            ->put('/tasks/'.$task->id, [
+                'description' => $task->description,
+                'status' => 'todo',
+            ]);
+
+        $this->actingAs($user)
+            ->put('/tasks/'.$task->id, [
+                'description' => $task->description,
+                'status' => 'in progress',
+            ]);
+
+        Notification::assertSentTimes(TaskInProgressReminder::class, 1);
+    }
+
+    /** @test */
+    public function updating_task_only_dispatches_notification_for_in_progress_task()
+    {
+        Notification::fake();
+
+        $user = User::factory()->create();
+        $task = Task::factory()->create(['user_id' => $user->id, 'status' => 'todo', 'progress_started_at' => null]);
+
+        $this->actingAs($user)
+            ->put('/tasks/'.$task->id, [
+                'description' => $task->description,
+                'status' => 'done',
+            ]);
+
+        Notification::assertNothingSent();
     }
 }

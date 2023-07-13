@@ -12,7 +12,7 @@ class TaskInProgressReminder extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(private readonly Task $task)
+    public function __construct(public readonly Task $task)
     {
         $this->afterCommit();
     }
