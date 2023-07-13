@@ -2,7 +2,8 @@ declare global {
     interface Task {
         id: number,
         description: string,
-        subtasks: Task[]
+        subtasks: Task[],
+        status: string,
     }
 }
 export {}
