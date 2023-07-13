@@ -28,7 +28,7 @@ class Task extends Model
 
     public function isInProgress()
     {
-        return $this->status === 'in progress';
+        return $this->status === TaskStatus::IN_PROGRESS->value;
     }
 
     public function isSubtask(): bool
