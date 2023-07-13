@@ -185,4 +185,9 @@ return [
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 
+    /*
+     * How many hours to wait before sending a reminder to the user that the task is in progress
+     */
+    'in_progress_reminder_wait_hours' => env('IN_PROGRESS_REMINDER_WAIT_HOURS', '24'),
+
 ];

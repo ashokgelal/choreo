@@ -8,10 +8,11 @@ class TaskFactory extends Factory
 {
     public function definition(): array
     {
+        $status = $this->faker->randomElement(['todo', 'in progress', 'done']);
         return [
             'description' => $this->faker->sentence,
-            'status' => $this->faker->randomElement(['todo', 'in progress', 'done']),
-            'progress_started_at' => $this->faker->boolean(50) ? $this->faker->dateTimeBetween('-1 year') : null,
+            'status' => $status,
+            'progress_started_at' => $status === 'in progress' ? $this->faker->dateTimeBetween('-1 year') : null,
         ];
     }
 }
