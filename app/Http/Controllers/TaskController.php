@@ -13,6 +13,7 @@ class TaskController extends Controller
     {
         $tasks = Task::with('user', 'subtasks')
             ->where('user_id', auth()->id())
+            ->parentOnly()
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -25,6 +26,7 @@ class TaskController extends Controller
 
         $request->user()->tasks()->create([
             'description' => $request->description,
+            'parent_task_id' => $request->parent_task_id,
         ]);
 
         return redirect()->back();

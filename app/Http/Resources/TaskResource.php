@@ -19,7 +19,8 @@ class TaskResource extends JsonResource
             'user' => [
                 'id' => $this->user->id,
                 'name' => $this->user->name,
-            ]
+            ],
+            'subtasks' => TaskResource::collection($this->whenLoaded('subtasks')),
         ];
     }
 }
