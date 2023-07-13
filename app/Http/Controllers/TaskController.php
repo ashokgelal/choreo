@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\TaskResource;
 use App\Models\Task;
+use App\Notifications\TaskInProgressReminder;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -40,6 +41,8 @@ class TaskController extends Controller
 
         $task->update($request->all());
 
+        $this->dispatchReminderIfInProgress($task);
+
         return redirect()->back();
     }
 
@@ -50,5 +53,18 @@ class TaskController extends Controller
         $task->delete();
 
         return redirect()->back();
+    }
+
+    private function dispatchReminderIfInProgress(Task $task): void
+    {
+        if ($task->wasChanged('status') && $task->isInProgress()) {
+            // let's only send the reminder if the task wasn't already in progress at some point in the past
+            if($task->progress_started_at === null)
+            {
+                $task->progress_started_at = now();
+                $task->save();
+                $task->user->notify(new TaskInProgressReminder($task));
+            }
+        }
     }
 }
