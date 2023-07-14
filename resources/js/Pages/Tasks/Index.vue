@@ -19,12 +19,12 @@ const props = defineProps({
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">Tasks</h2>
         </template>
 
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
-                <AddTaskForm/>
-                <div v-if="tasks.data.length" class="bg-white overflow-hidden shadow-sm sm:rounded-lg h-full">
-                    <TaskList :tasks="tasks.data"/>
-                </div>
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8 py-12 flex flex-col">
+            <div class="self-end">
+                <AddTaskForm />
+            </div>
+            <div v-if="tasks.data.length" class="bg-white overflow-hidden shadow-sm sm:rounded-lg min-h-screen">
+                <TaskList :tasks="tasks.data"/>
             </div>
         </div>
     </AuthenticatedLayout>
