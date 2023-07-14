@@ -23,7 +23,7 @@ const props = defineProps({
             <div class="self-end">
                 <AddTaskForm />
             </div>
-            <div v-if="tasks.data.length" class="bg-white overflow-hidden shadow-sm sm:rounded-lg min-h-screen">
+            <div v-if="tasks.data.length" class="bg-white overflow-hidden shadow-sm sm:rounded-lg min-h-[22rem]">
                 <TaskList :tasks="tasks.data"/>
             </div>
         </div>
