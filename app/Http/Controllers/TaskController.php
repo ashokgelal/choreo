@@ -26,7 +26,7 @@ class TaskController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate(['description' => 'required', 'parent_task_id' => 'nullable|exists:tasks,id']);
-        $parentTaskId = $validated['parent_task_id'];
+        $parentTaskId = $validated['parent_task_id'] ?? null;
 
         if($parentTaskId !== null)
         {
