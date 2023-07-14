@@ -7,10 +7,11 @@ use App\Models\TaskStatus;
 use App\Models\User;
 use App\Notifications\TaskInProgressReminder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Queue;
-use Tests\TestCase;
-use Inertia\Testing\AssertableInertia as Assert;
+use Illuminate\Notifications\SendQueuedNotifications;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Queue;
+use Inertia\Testing\AssertableInertia as Assert;
+use Tests\TestCase;
 
 class TaskTest extends TestCase
 {
@@ -28,7 +29,7 @@ class TaskTest extends TestCase
 
         $this->actingAs($user)
             ->get('/tasks')
-            ->assertInertia(fn (Assert $page) => $page
+            ->assertInertia(fn(Assert $page) => $page
                 ->component('Tasks/Index')
                 ->has('tasks.data', 2)
                 ->where('tasks.data.0.id', $userTask1->id)
@@ -61,7 +62,7 @@ class TaskTest extends TestCase
         $otherUser = User::factory()->create();
 
         $response = $this->actingAs($otherUser)
-            ->patch('/tasks/'.$task->id, [
+            ->patch('/tasks/' . $task->id, [
                 'description' => 'Updated Task',
             ]);
 
@@ -77,7 +78,7 @@ class TaskTest extends TestCase
         $otherUser = User::factory()->create();
 
         $response = $this->actingAs($otherUser)
-            ->delete('/tasks/'.$task->id);
+            ->delete('/tasks/' . $task->id);
 
         $response->assertStatus(403);
         $this->assertDatabaseHas('tasks', ['id' => $task->id]);
@@ -89,12 +90,12 @@ class TaskTest extends TestCase
         Notification::fake();
 
         $user = User::factory()->create();
-        $task = Task::factory()->create(['user_id' => $user->id, 'status' => 'todo', 'progress_started_at' => null]);
+        $task = Task::factory()->create(['user_id' => $user->id, 'status' => TaskStatus::TODO->value, 'progress_started_at' => null]);
 
         $this->actingAs($user)
-            ->put('/tasks/'.$task->id, [
+            ->put('/tasks/' . $task->id, [
                 'description' => $task->description,
-                'status' => 'in progress',
+                'status' => TaskStatus::IN_PROGRESS->value,
             ]);
 
         Notification::assertSentTo($user, TaskInProgressReminder::class, function ($notification, $channels) use ($task) {
@@ -108,24 +109,24 @@ class TaskTest extends TestCase
         Notification::fake();
 
         $user = User::factory()->create();
-        $task = Task::factory()->create(['user_id' => $user->id, 'status' => 'todo', 'progress_started_at' => null]);
+        $task = Task::factory()->create(['user_id' => $user->id, 'status' => TaskStatus::TODO->value, 'progress_started_at' => null]);
 
         $this->actingAs($user)
-            ->put('/tasks/'.$task->id, [
+            ->put('/tasks/' . $task->id, [
                 'description' => $task->description,
-                'status' => 'in progress',
+                'status' => TaskStatus::IN_PROGRESS->value,
             ]);
 
         $this->actingAs($user)
-            ->put('/tasks/'.$task->id, [
+            ->put('/tasks/' . $task->id, [
                 'description' => $task->description,
-                'status' => 'todo',
+                'status' => TaskStatus::TODO->value,
             ]);
 
         $this->actingAs($user)
-            ->put('/tasks/'.$task->id, [
+            ->put('/tasks/' . $task->id, [
                 'description' => $task->description,
-                'status' => 'in progress',
+                'status' => TaskStatus::IN_PROGRESS->value,
             ]);
 
         Notification::assertSentTimes(TaskInProgressReminder::class, 1);
@@ -137,12 +138,12 @@ class TaskTest extends TestCase
         Notification::fake();
 
         $user = User::factory()->create();
-        $task = Task::factory()->create(['user_id' => $user->id, 'status' => 'todo', 'progress_started_at' => null]);
+        $task = Task::factory()->create(['user_id' => $user->id, 'status' => TaskStatus::TODO->value, 'progress_started_at' => null]);
 
         $this->actingAs($user)
-            ->put('/tasks/'.$task->id, [
+            ->put('/tasks/' . $task->id, [
                 'description' => $task->description,
-                'status' => 'done',
+                'status' => TaskStatus::DONE->value,
             ]);
 
         Notification::assertNothingSent();
@@ -155,13 +156,53 @@ class TaskTest extends TestCase
         $task = Task::factory()->create(['user_id' => $user->id]);
 
         $this->actingAs($user)
-            ->put('/tasks/'.$task->id, [
+            ->put('/tasks/' . $task->id, [
                 'status' => 'invalid_status'
             ])->assertSessionHasErrors('status');
 
         $this->actingAs($user)
-            ->put('/tasks/'.$task->id, [
+            ->put('/tasks/' . $task->id, [
                 'status' => TaskStatus::DONE->value
             ])->assertSessionDoesntHaveErrors('status');
     }
+
+    /** @test */
+    public function reminder_is_not_sent_if_task_no_longer_in_progress()
+    {
+        $user = User::factory()->create();
+        $task = Task::factory()->create(['user_id' => $user->id, 'status' => TaskStatus::TODO->value, 'progress_started_at' => null]);
+
+        $this->actingAs($user)
+            ->put('/tasks/' . $task->id, [
+                'description' => $task->description,
+                'status' => TaskStatus::IN_PROGRESS->value,
+            ]);
+
+        $task->status = TaskStatus::DONE->value;
+        $task->save();
+
+        Notification::fake();
+        Notification::send($user, new TaskInProgressReminder($task));
+        Notification::assertNothingSent();
+    }
+
+    /** @test */
+    public function in_progress_task_reminder_gets_queued()
+    {
+        Queue::fake();
+
+        $user = User::factory()->create();
+        $task = Task::factory()->create(['user_id' => $user->id, 'status' => TaskStatus::TODO->value, 'progress_started_at' => null]);
+
+        $this->actingAs($user)
+            ->put('/tasks/' . $task->id, [
+                'description' => $task->description,
+                'status' => TaskStatus::IN_PROGRESS->value,
+            ]);
+
+        Queue::assertPushed(SendQueuedNotifications::class, function ($job) use ($task) {
+            return $job->notification->task->id === $task->id;
+        });
+    }
+
 }
