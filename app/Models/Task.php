@@ -25,4 +25,14 @@ class Task extends Model
     {
         return $query->whereNull('parent_task_id');
     }
+
+    public function isInProgress()
+    {
+        return $this->status === TaskStatus::IN_PROGRESS->value;
+    }
+
+    public function isSubtask(): bool
+    {
+        return $this->parent_task_id !== null;
+    }
 }
