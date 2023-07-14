@@ -188,6 +188,6 @@ return [
     /*
      * How many hours to wait before sending a reminder to the user that the task is in progress
      */
-    'in_progress_reminder_wait_hours' => env('IN_PROGRESS_REMINDER_WAIT_HOURS', '24'),
+    'in_progress_reminder_wait_minutes' => env('IN_PROGRESS_REMINDER_WAIT_MINUTES', '1440'),
 
 ];

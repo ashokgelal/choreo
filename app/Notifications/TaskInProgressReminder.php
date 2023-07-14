@@ -25,7 +25,7 @@ class TaskInProgressReminder extends Notification implements ShouldQueue
     public function withDelay()
     {
         return [
-            'mail' => now()->addHours(config('app.in_progress_reminder_wait_hours')),
+            'mail' => now()->addMinutes(config('app.in_progress_reminder_wait_minutes')),
         ];
     }
 
