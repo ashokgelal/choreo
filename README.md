@@ -86,7 +86,7 @@ run the application without Docker, refer to the [Laravel documentation](https:/
 # Choreo Features
 
 Choreo offers several features to help you efficiently manage your tasks and track their 
-progress. The key features of the application are as follows:
+progress. The key features of the application are:
 
 - **Create Tasks**
  
@@ -104,7 +104,7 @@ progress. The key features of the application are as follows:
     - **In Progress**: This status indicates that work is actively being done on the task.
     - **Done**: This status signifies that the task has been completed.
 
-## Email Reminder for Tasks in Progress
+## Email Reminders for Tasks in Progress
 
 When a task's status is changed to "In Progress," the application sets a reminder for 24 hours later. If the task is 
 still in progress after this timeframe, the application automatically sends an email reminder to the task owner. 
@@ -165,7 +165,7 @@ One of the biggest challenges in developing Choreo was determining the most effe
 reminders. I considered two options: running a scheduled job or queuing a reminder right away when a task is marked 
 as "In Progress." Evaluating and selecting the best approach required careful consideration of several factors.
 
-1. Running a Scheduled Job:
+### 1. Running a Scheduled Job:
 
    This option involved implementing a scheduled job that would run at regular intervals (e.g., every minute) to 
    check all tasks marked as "In Progress" for over 24 hours. It would then send email reminders for these tasks. 
@@ -180,7 +180,7 @@ as "In Progress." Evaluating and selecting the best approach required careful co
    More code means more maintenance and more chances of bugs. 
 
 
-2. Queueing a Reminder Right Away:
+### 2. Queueing a Reminder Right Away:
 
    The alternative approach involved queuing a reminder immediately when a task was marked as "In Progress" for the
    first time. I found this to be quite simpler to implement than the scheduled job approach and definitely needed 
@@ -203,7 +203,7 @@ Once I decided to go with the second approach, I had to figure out two technical
 2. How to not send an email reminder if the task's status was changed to some other status and then back to "In Progress"
    within the 24-hour timeframe.
 
-For the first one, I decided to use the [shouldSend()](https://laravel.com/docs/10.x/notifications#determining-if-the-queued-notification-should-be-sent)
+For the first one, I decided to use [shouldSend()](https://laravel.com/docs/10.x/notifications#determining-if-the-queued-notification-should-be-sent)
 method of the notification class. This method is called before the notification is sent and can be used to determine 
 if the notification should be sent. In our case, we check if the status is still "In Progress" or not and return false
 if it is not.
@@ -230,9 +230,9 @@ already seeded.
     - Email: demo@example.com
     - Password: password
 
-## Email Reminder Testing
+## Email Reminders Testing
 
-To facilitate testing of the email reminder feature, I have made some modifications in the demo version:
+To facilitate testing of the email reminders feature, I have made some modifications in the demo version:
 
 - The email reminder is sent within about a minute and a half (90 seconds) after a task's status is changed 
     to "In Progress".
